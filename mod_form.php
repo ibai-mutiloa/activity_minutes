@@ -66,6 +66,9 @@ class mod_minute_mod_form extends moodleform_mod {
             $this->add_intro_editor();
         }
 
+        // Adding the meeting date/time field (Calendar)
+        $mform->addElement('date_time_selector', 'meeting_date', get_string('meetingdate', 'mod_minute'));
+
         // Adding the rest of mod_minute settings, spreading all them into this fieldset
         // ... or adding more fieldsets ('header' elements) if needed for better logic.
         $mform->addElement('static', 'label1', 'minutesettings', get_string('minutesettings', 'mod_minute'));
