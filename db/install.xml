@@ -19,5 +19,17 @@
         <KEY NAME="fk_course" TYPE="foreign" FIELDS="course" REFTABLE="course" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
+    <TABLE NAME="minute_members" COMMENT="Members of a meeting">
+        <FIELDS>
+            <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+            <FIELD NAME="minuteid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+            <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        </FIELDS>
+        <KEYS>
+            <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            <KEY NAME="fk_minute_members_minuteid" TYPE="foreign" FIELDS="minuteid" REFTABLE="minute" REFFIELDS="id"/>
+            <KEY NAME="fk_minute_members_userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+        </KEYS>
+    </TABLE>
   </TABLES>
 </XMLDB>
