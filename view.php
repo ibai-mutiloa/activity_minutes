@@ -45,6 +45,16 @@ require_login($course, true, $cm);
 
 $modulecontext = context_module::instance($cm->id);
 
+$members = $DB->get_records('minute_members', ['minuteid' => $minute->id]);
+
+echo html_writer::start_tag('ul');
+foreach ($members as $member) {
+    $user = $DB->get_record('user', ['id' => $member->userid]);
+    echo html_writer::tag('li', fullname($user));
+}
+echo html_writer::end_tag('ul');
+
+
 $event = \mod_minute\event\course_module_viewed::create(array(
     'objectid' => $moduleinstance->id,
     'context' => $modulecontext

@@ -51,9 +51,25 @@ function minute_supports($feature) {
 function minute_add_instance($moduleinstance, $mform = null) {
     global $DB;
 
+    // Verificar si course está definido
+    error_log('Course ID received: ' . print_r($moduleinstance->course, true));
+
+    if (empty($moduleinstance->course) || !$DB->record_exists('course', ['id' => $moduleinstance->course])) {
+        throw new moodle_exception('invalidcourseid', 'error');
+    }
+
     $moduleinstance->timecreated = time();
 
     $id = $DB->insert_record('minute', $moduleinstance);
+
+    if (!empty($moduleinstance->members) && is_array($moduleinstance->members)) {
+        foreach ($moduleinstance->members as $userid) {
+            $member = new stdClass();
+            $member->minuteid = $id;
+            $member->userid = $userid;
+            $DB->insert_record('minute_members', $member);
+        }
+    }
 
     return $id;
 }

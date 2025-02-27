@@ -25,4 +25,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['modulename'] = 'Minute';
+$string['modulenameplural'] = 'Minutes';
+$string['modulename_help'] = 'This activity allows users to easily create and manage meeting minutes. By establishing parameters such as members, tasks to do, and tasks for the next meeting, users can quickly generate a well-organized minute document for each session. The plugin streamlines the process of documenting and tracking meeting outcomes, making it easier for teams to stay on top of their tasks and future agendas.';
 $string['pluginname'] = 'minute';
+$string['minutename'] = 'Meeting Name';
+$string['meetingdate'] = 'Meeting Date';

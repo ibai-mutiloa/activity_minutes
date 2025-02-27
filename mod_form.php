@@ -40,7 +40,7 @@ class mod_minute_mod_form extends moodleform_mod {
      */
     public function definition() {
         global $CFG;
-
+        global $COURSE;
         $mform = $this->_form;
 
         // Adding the "general" fieldset, where all the common settings are shown.
@@ -65,6 +65,28 @@ class mod_minute_mod_form extends moodleform_mod {
         } else {
             $this->add_intro_editor();
         }
+
+        $mform->addElement('header', 'memberssection', get_string('members', 'mod_minute'));
+
+        // Get course users.
+        $context = context_course::instance($COURSE->id);
+        $users = get_enrolled_users($context);
+
+        $options = [];
+        foreach ($users as $user) {
+            $options[$user->id] = fullname($user);
+        }
+
+        $mform->addElement('autocomplete', 'members', get_string('selectmembers', 'mod_minute'), $options, ['multiple' => true]);
+        $mform->setType('members', PARAM_INT);
+        if (!isset($COURSE->id)) {
+            throw new moodle_exception('invalidcourseid', 'error');
+        }
+        $mform->addElement('hidden', 'course', $COURSE->id);
+        $mform->setType('course', PARAM_INT);
+
+        // Adding the meeting date/time field (Calendar)
+        $mform->addElement('date_time_selector', 'meeting_date', get_string('meetingdate', 'mod_minute'));
 
         // Adding the rest of mod_minute settings, spreading all them into this fieldset
         // ... or adding more fieldsets ('header' elements) if needed for better logic.
