@@ -45,7 +45,8 @@ require_login($course, true, $cm);
 
 $modulecontext = context_module::instance($cm->id);
 
-$members = $DB->get_records('minute_members', ['minuteid' => $minute->id]);
+// Obtener los miembros del minuto
+$members = $DB->get_records('minute_members', ['minuteid' => $moduleinstance->id]);
 
 echo html_writer::start_tag('ul');
 foreach ($members as $member) {
@@ -54,7 +55,7 @@ foreach ($members as $member) {
 }
 echo html_writer::end_tag('ul');
 
-
+// Disparar el evento cuando el módulo se visualiza
 $event = \mod_minute\event\course_module_viewed::create(array(
     'objectid' => $moduleinstance->id,
     'context' => $modulecontext
@@ -69,5 +70,7 @@ $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_context($modulecontext);
 
 echo $OUTPUT->header();
+
+// Aquí puedes agregar más contenido si es necesario, por ejemplo, mostrar detalles del minuto
 
 echo $OUTPUT->footer();

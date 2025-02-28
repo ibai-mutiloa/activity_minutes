@@ -66,6 +66,20 @@ class mod_minute_mod_form extends moodleform_mod {
             $this->add_intro_editor();
         }
 
+        // Campo de duración (horas y minutos)
+        $mform->addElement('header', 'durationheader', get_string('duration', 'mod_minute'));
+
+        // Campo para horas
+        $mform->addElement('select', 'duration_hours', get_string('hours', 'mod_minute'), range(0, 23));
+        $mform->setType('duration_hours', PARAM_INT);
+
+        // Campo para minutos
+        $mform->addElement('select', 'duration_minutes', get_string('minutes', 'mod_minute'), range(0, 59));
+        $mform->setType('duration_minutes', PARAM_INT);
+
+        // Adding the meeting date/time field (Calendar)
+        $mform->addElement('date_time_selector', 'meeting_date', get_string('meetingdate', 'mod_minute'));
+
         $mform->addElement('header', 'memberssection', get_string('members', 'mod_minute'));
 
         // Get course users.
@@ -85,13 +99,18 @@ class mod_minute_mod_form extends moodleform_mod {
         $mform->addElement('hidden', 'course', $COURSE->id);
         $mform->setType('course', PARAM_INT);
 
-        // Adding the meeting date/time field (Calendar)
-        $mform->addElement('date_time_selector', 'meeting_date', get_string('meetingdate', 'mod_minute'));
+        $mform->addElement('header', 'tasksheader', get_string('tasks', 'mod_minute'));
 
-        // Adding the rest of mod_minute settings, spreading all them into this fieldset
-        // ... or adding more fieldsets ('header' elements) if needed for better logic.
-        $mform->addElement('static', 'label1', 'minutesettings', get_string('minutesettings', 'mod_minute'));
-        $mform->addElement('header', 'minutefieldset', get_string('minutefieldset', 'mod_minute'));
+        // Usar el editor de texto Atto para permitir formato enriquecido
+        $mform->addElement('editor', 'tasks', get_string('tasklist', 'mod_minute'), null, array('subdirs' => 0, 'maxfiles' => 0, 'trusttext' => 1));
+        $mform->setType('tasks', PARAM_RAW);
+
+        $mform->addElement('header', 'tasksheader2', get_string('tasks2', 'mod_minute'));
+
+        // Usar el editor de texto Atto para permitir formato enriquecido
+        $mform->addElement('editor', 'tasks2', get_string('tasklist2', 'mod_minute'), null, array('subdirs' => 0, 'maxfiles' => 0, 'trusttext' => 1));
+        $mform->setType('tasks2', PARAM_RAW);
+
 
         // Add standard elements.
         $this->standard_coursemodule_elements();

@@ -70,6 +70,8 @@ function minute_add_instance($moduleinstance, $mform = null) {
             $DB->insert_record('minute_members', $member);
         }
     }
+    // Llamar a la función para generar el PDF después de insertar los datos
+    generate_minutes_pdf($moduleinstance);
 
     return $id;
 }
@@ -87,10 +89,19 @@ function minute_add_instance($moduleinstance, $mform = null) {
 function minute_update_instance($moduleinstance, $mform = null) {
     global $DB;
 
+    // Actualizar la marca de tiempo
     $moduleinstance->timemodified = time();
     $moduleinstance->id = $moduleinstance->instance;
 
-    return $DB->update_record('minute', $moduleinstance);
+    // Actualizar los datos en la base de datos
+    $updated = $DB->update_record('minute', $moduleinstance);
+
+    // Si la actualización fue exitosa, generar el PDF
+    if ($updated) {
+        generate_minutes_pdf($moduleinstance);
+    }
+
+    return $updated;
 }
 
 /**
@@ -110,4 +121,96 @@ function minute_delete_instance($id) {
     $DB->delete_records('minute', array('id' => $id));
 
     return true;
+}
+
+require_once($CFG->dirroot . '/lib/tcpdf/tcpdf.php');
+/**
+ * Función para generar el PDF con los datos del formulario
+ *
+ * @param object $moduleinstance Los datos del formulario
+ */
+function generate_minutes_pdf($moduleinstance) {
+    global $DB;
+
+    // Obtener los miembros asociados a la instancia
+    $members = $DB->get_records('minute_members', array('minuteid' => $moduleinstance->id));
+
+    $member_names = [];
+    foreach ($members as $member) {
+        // Obtener el nombre completo de cada usuario
+        $user = $DB->get_record('user', array('id' => $member->userid));
+        if ($user) {
+            $member_names[] = fullname($user);
+        }
+    }
+
+    // Crear el PDF usando TCPDF
+    $pdf = new TCPDF();
+    $pdf->AddPage();
+    $pdf->SetFont('helvetica', '', 12);
+
+    // Título del PDF
+    $pdf->Cell(0, 10, 'Meeting Minutes: ' . $moduleinstance->name, 0, 1, 'C');
+
+    // Tareas
+    $pdf->Ln(10);
+    $pdf->Cell(0, 10, 'Tasks for next meeting:', 0, 1);
+
+    // Verificar si tasks está vacío y manejarlo
+    if (!empty($moduleinstance->tasks)) {
+        // Si tasks es un array, convertirlo a string.
+        if (is_array($moduleinstance->tasks)) {
+            $moduleinstance->tasks = implode(', ', $moduleinstance->tasks);
+        }
+        // Eliminar cualquier etiqueta HTML si es necesario
+        $tasks_plain_text = strip_tags($moduleinstance->tasks);
+        // Añadir las tareas al PDF
+        $pdf->MultiCell(0, 10, $tasks_plain_text);
+    } else {
+        $pdf->MultiCell(0, 10, 'No tasks defined.');
+    }
+
+    // Miembros
+    $pdf->Ln(10);
+    $pdf->Cell(0, 10, 'Members:', 0, 1);
+    $pdf->SetFont('helvetica', '', 10);
+    if (count($member_names) > 0) {
+        foreach ($member_names as $name) {
+            $pdf->Cell(0, 10, $name, 0, 1);
+        }
+    } else {
+        $pdf->Cell(0, 10, 'No members assigned.');
+    }
+
+    // Duración
+    $duration = sprintf("%02d:%02d", $moduleinstance->duration_hours, $moduleinstance->duration_minutes);
+    $pdf->Ln(10);
+    $pdf->Cell(0, 10, 'Duration: ' . $duration, 0, 1);
+
+    // Fecha de la reunión
+    $meeting_date = userdate($moduleinstance->meeting_date);
+    $pdf->Cell(0, 10, 'Meeting Date: ' . $meeting_date, 0, 1);
+
+    // Generar el archivo PDF
+    $pdf->Output('meeting_minutes_' . $moduleinstance->id . '.pdf', 'D');
+}
+
+/**
+ * Trigger the course module viewed event.
+ *
+ * @param object $moduleinstance The module instance object.
+ */
+function minute_view($moduleinstance) {
+    global $DB, $PAGE;
+
+    // Verificar si el módulo es visualizado
+    $context = context_module::instance($moduleinstance->cmid);
+    $event = \mod_minute\event\course_module_viewed::create(array(
+        'objectid' => $moduleinstance->id,
+        'context' => $context,
+        'courseid' => $moduleinstance->course
+    ));
+
+    // Disparar el evento
+    $event->trigger();
 }
