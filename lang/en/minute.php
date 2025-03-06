@@ -40,3 +40,4 @@ $string['tasks'] = 'Tasks To Do';
 $string['tasklist'] = 'Tasks to Do';
 $string['tasks2'] = 'Tasks for Next Meeting';
 $string['tasklist2'] = 'Tasks for Next Meeting';
+$string['downloadfile'] = 'Download File';
