@@ -1,26 +1,15 @@
 <?php
 // This file is part of Moodle - https://moodle.org/
-//
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-//
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
+// the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
-
-/**
- * Prints an instance of mod_minute.
- *
- * @package     mod_minute
- * @copyright   2025 Ibai Mutiloa <ibaimuga03@gmail.com>
- * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
 
 require(__DIR__.'/../../config.php');
 require_once(__DIR__.'/lib.php');
@@ -45,16 +34,21 @@ require_login($course, true, $cm);
 
 $modulecontext = context_module::instance($cm->id);
 
-$members = $DB->get_records('minute_members', ['minuteid' => $minute->id]);
+$PAGE->set_url('/mod/minute/view.php', array('id' => $cm->id));
+$PAGE->set_title(format_string($moduleinstance->name));
+$PAGE->set_heading(format_string($course->fullname));
+$PAGE->set_context($modulecontext);
 
-echo html_writer::start_tag('ul');
-foreach ($members as $member) {
-    $user = $DB->get_record('user', ['id' => $member->userid]);
-    echo html_writer::tag('li', fullname($user));
-}
-echo html_writer::end_tag('ul');
+echo $OUTPUT->header();
 
+echo $OUTPUT->heading(format_string($moduleinstance->name));
 
+// Botón de descarga
+$downloadurl = new moodle_url('/mod/minute/download.php', ['id' => $cm->id]); // Asegúrate de que este URL apunte a 'download.php'
+echo html_writer::tag('div', html_writer::link($downloadurl, get_string('downloadfile', 'mod_minute'), ['class' => 'btn btn-primary'])
+);
+
+// Disparar el evento cuando el módulo se visualiza
 $event = \mod_minute\event\course_module_viewed::create(array(
     'objectid' => $moduleinstance->id,
     'context' => $modulecontext
@@ -62,12 +56,5 @@ $event = \mod_minute\event\course_module_viewed::create(array(
 $event->add_record_snapshot('course', $course);
 $event->add_record_snapshot('minute', $moduleinstance);
 $event->trigger();
-
-$PAGE->set_url('/mod/minute/view.php', array('id' => $cm->id));
-$PAGE->set_title(format_string($moduleinstance->name));
-$PAGE->set_heading(format_string($course->fullname));
-$PAGE->set_context($modulecontext);
-
-echo $OUTPUT->header();
 
 echo $OUTPUT->footer();
