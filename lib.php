@@ -152,6 +152,20 @@ function generate_minutes_pdf($moduleinstance) {
     // Título del PDF
     $pdf->Cell(0, 10, 'Meeting Minutes: ' . $moduleinstance->name, 0, 1, 'C');
 
+    // Tareas para la reunión actual
+    $pdf->Ln(10);
+    $pdf->Cell(0, 10, 'Tasks to do:', 0, 1);
+
+    if (!empty($moduleinstance->tasks2)) {
+        if (is_array($moduleinstance->tasks2)) {
+            $moduleinstance->tasks2 = implode(', ', $moduleinstance->tasks2);
+        }
+        $tasks2_plain_text = strip_tags($moduleinstance->tasks2);
+        $pdf->MultiCell(0, 10, $tasks2_plain_text);
+    } else {
+        $pdf->MultiCell(0, 10, 'No tasks to do defined.');
+    }
+
     // Tareas
     $pdf->Ln(10);
     $pdf->Cell(0, 10, 'Tasks for next meeting:', 0, 1);

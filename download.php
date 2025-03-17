@@ -17,6 +17,12 @@ $moduleinstance = $DB->get_record('minute', array('id' => $cm->instance), '*', M
 require_login($course, true, $cm);
 require_capability('mod_minute:view', $context);
 
+// Obtener el título de la reunión
+$meeting_title = isset($moduleinstance->name) ? $moduleinstance->name : 'reunion';
+
+// Limpiar el nombre para evitar caracteres no permitidos en el nombre del archivo
+$clean_title = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $meeting_title);
+
 // Generar el PDF y guardarlo en un buffer
 ob_start();
 generate_minutes_pdf($moduleinstance);
@@ -24,9 +30,10 @@ $pdf_output = ob_get_clean();
 
 // Definir las cabeceras para forzar la descarga del archivo PDF
 header('Content-Type: application/pdf');
-header('Content-Disposition: attachment; filename="minuto_' . $moduleinstance->id . '.pdf"');
+header('Content-Disposition: attachment; filename="meeting_minutes_' . $clean_title . '.pdf"');
 header('Content-Length: ' . strlen($pdf_output));
 
 // Enviar el contenido del archivo PDF
 echo $pdf_output;
 exit;
+
